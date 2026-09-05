@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liga del Valle - En Vivo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>⚽ Liga del Valle</h1>
+    <p>Resultados y Minuto a Minuto en Tiempo Real</p>
+  </header>
+
+  <div class="container">
+    <h2>🔴 Partidos en Vivo y de la Fecha</h2>
+    <div id="matches-container">
+      <p>Cargando partidos...</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Reemplazar con tus credenciales de Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyBRg-ZamZqFXK-cynKIt6X-FJXDCdD6Osg",
+  authDomain: "liga-del-valle.firebaseapp.com",
+  databaseURL: "https://liga-del-valle-default-rtdb.firebaseio.com",
+  projectId: "liga-del-valle",
+  storageBucket: "liga-del-valle.firebasestorage.app",
+  messagingSenderId: "421001437016",
+  appId: "1:421001437016:web:afeb2b18ca82b9bc850f2d"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const matchesContainer = document.getElementById("matches-container");
+
+    // Escuchar la base de datos EN TIEMPO REAL
+    const q = query(collection(db, "matches"), orderBy("date", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+      matchesContainer.innerHTML = "";
+      
+      if (snapshot.empty) {
+        matchesContainer.innerHTML = "<p>No hay partidos registrados por el momento.</p>";
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const match = doc.data();
+        const card = document.createElement("div");
+        card.className = "card";
+
+        let statusBadge = "";
+        if (match.status === "LIVE") {
+          statusBadge = `<span class="badge-live">EN VIVO ${match.minute || ''}</span>`;
+        } else if (match.status === "FINISHED") {
+          statusBadge = `<span>FINALIZADO</span>`;
+        } else {
+          statusBadge = `<span>PROGRAMADO</span>`;
+        }
+
+        let eventsHTML = "";
+        if (match.events && match.events.length > 0) {
+          eventsHTML = `<div class="timeline"><strong>Incidencias:</strong>`;
+          match.events.forEach(evt => {
+            eventsHTML += `<div class="event-item">⏱️ ${evt.minute} - ${evt.type}: ${evt.player} (${evt.team === 'home' ? match.homeTeam : match.awayTeam})</div>`;
+          });
+          eventsHTML += `</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="match-header">
+            <span>Fecha ${match.matchday || 1}</span>
+            ${statusBadge}
+          </div>
+          <div class="scoreboard">
+            <div>${match.homeTeam}</div>
+            <div class="score">${match.homeScore} - ${match.awayScore}</div>
+            <div>${match.awayTeam}</div>
+          </div>
+          ${eventsHTML}
+        `;
+
+        matchesContainer.appendChild(card);
+      });
+    });
+  </script>
+</body>
+</html>
