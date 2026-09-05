@@ -3,52 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Control | Liga del Valle</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Panel de Administración</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar" id="navbar">
-      <div class="container nav-container">
-          <a href="#" class="logo">Panel <span>Clubes</span></a>
-      </div>
-  </nav>
-
-  <main class="container" style="padding-top: 100px; padding-bottom: 60px;">
+  <div class="container">
     
-    <!-- Login -->
-    <div id="login-section" class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-      <h2>Iniciar Sesión</h2>
+    <!-- LOGIN -->
+    <div id="login-section" class="admin-card" style="max-width: 400px; margin: 40px auto; text-align: center;">
+      <h2 style="margin-bottom: 20px;">Acceso a Clubes</h2>
       <input type="email" id="email" placeholder="Correo electrónico">
       <input type="password" id="password" placeholder="Contraseña">
-      <button id="btn-login" style="margin-top: 20px;">Ingresar</button>
-      <p id="login-error" style="color: var(--live-color); margin-top:15px; font-weight: 600;"></p>
+      <button id="btn-login">Ingresar</button>
+      <p id="login-error" style="color: #EF4444; margin-top:10px;"></p>
     </div>
 
-    <!-- Admin -->
+    <!-- PANEL ADMIN -->
     <div id="admin-section" style="display:none;">
       
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; padding: 15px;">
-        <span id="user-info" style="font-weight: 600; color: var(--primary-color);"></span>
-        <button id="btn-logout" class="danger" style="width: auto; padding: 8px 15px; margin-top: 0;">Salir</button>
+      <div class="admin-card" style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="user-info" style="font-weight: bold; color: var(--live-color);"></span>
+        <button id="btn-logout" class="danger" style="width: auto; padding: 5px 15px; margin:0;">Salir</button>
       </div>
 
-      <div class="card" style="margin-bottom: 30px;">
-        <h3>➕ Crear Partido</h3>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <input type="text" id="new-home" placeholder="Local" style="width: 40%;">
-            <input type="text" id="new-away" placeholder="Visitante" style="width: 40%;">
-            <input type="number" id="new-matchday" placeholder="Fecha N°" value="1" style="width: 20%;">
+      <!-- ESTO SOLO LO VES VOS (EL SUPER ADMIN) -->
+      <div id="seccion-crear" class="admin-card" style="display:none; border: 2px solid var(--score-blue);">
+        <h3 style="margin-bottom: 15px;">👑 Crear y Asignar Partido</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="new-home" placeholder="Equipo Local">
+            <input type="text" id="new-away" placeholder="Equipo Visitante">
         </div>
-        <button id="btn-create-match" style="margin-top: 15px;">Crear Partido</button>
+        <input type="email" id="new-user" placeholder="Correo del encargado (Ej: club.boca@liga.com)">
+        <button id="btn-create-match">Crear Partido</button>
       </div>
 
-      <h3>⚙️ Control en Vivo</h3>
-      <div id="admin-matches-list" class="matches-grid"></div>
+      <!-- LISTA DE PARTIDOS ASIGNADOS -->
+      <h3 style="margin: 20px 0 10px;">⚽ Partidos Asignados</h3>
+      <div id="admin-matches-list"></div>
+
     </div>
-  </main>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -69,148 +64,129 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ... (Lógica de login igual al anterior)
+    // --- ¡ATENCIÓN! PONÉ TU CORREO REAL ACÁ ---
+    const correoAdmin = "tu_correo@gmail.com"; 
+    let currentUserEmail = "";
+
     const loginSection = document.getElementById("login-section");
     const adminSection = document.getElementById("admin-section");
-    const btnLogin = document.getElementById("btn-login");
-    const btnLogout = document.getElementById("btn-logout");
 
-    btnLogin.addEventListener("click", () => {
-      signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("password").value);
+    document.getElementById("btn-login").addEventListener("click", () => {
+      signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("password").value)
+        .catch(() => document.getElementById("login-error").textContent = "Credenciales incorrectas.");
     });
-    btnLogout.addEventListener("click", () => signOut(auth));
+    
+    document.getElementById("btn-logout").addEventListener("click", () => signOut(auth));
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        loginSection.style.display = "none"; adminSection.style.display = "block";
-        document.getElementById("user-info").textContent = user.email; loadAdminMatches();
+        currentUserEmail = user.email;
+        loginSection.style.display = "none"; 
+        adminSection.style.display = "block";
+        document.getElementById("user-info").textContent = "Usuario: " + user.email;
+        
+        // Mostrar form de creación solo a vos
+        if(user.email === correoAdmin) {
+            document.getElementById("seccion-crear").style.display = "block";
+        }
+        
+        loadAdminMatches();
       } else {
-        loginSection.style.display = "block"; adminSection.style.display = "none";
+        loginSection.style.display = "block"; 
+        adminSection.style.display = "none";
       }
     });
 
     document.getElementById("btn-create-match").addEventListener("click", async () => {
-      const home = document.getElementById("new-home").value; const away = document.getElementById("new-away").value;
-      if(!home || !away) return alert("Faltan equipos");
+      const home = document.getElementById("new-home").value;
+      const away = document.getElementById("new-away").value;
+      const assignedUser = document.getElementById("new-user").value;
+      
+      if(!home || !away || !assignedUser) return alert("Completá todos los campos");
+      
       await addDoc(collection(db, "matches"), {
         homeTeam: home, awayTeam: away, homeScore: 0, awayScore: 0,
-        status: "SCHEDULED", baseMinute: 0, addedTime: 0, matchday: parseInt(document.getElementById("new-matchday").value), events: [], date: serverTimestamp()
+        status: "SCHEDULED", baseMinute: 0, assignedUser: assignedUser.toLowerCase(),
+        events: [], date: serverTimestamp()
       });
-      alert("Partido creado");
+      alert("Partido creado y asignado.");
     });
 
-    // Cargar Partidos para Administrar
     function loadAdminMatches() {
       onSnapshot(collection(db, "matches"), (snapshot) => {
         const list = document.getElementById("admin-matches-list");
         list.innerHTML = "";
+        
         snapshot.forEach((matchDoc) => {
-          const m = matchDoc.data(); const id = matchDoc.id;
-          const div = document.createElement("div"); div.className = "card";
+          const m = matchDoc.data(); 
+          const id = matchDoc.id;
           
+          // FILTRO MÁGICO: Si no sos el admin, y el correo asignado no es el tuyo, lo ignora y no te lo muestra.
+          if(currentUserEmail !== correoAdmin && m.assignedUser !== currentUserEmail) {
+              return; 
+          }
+
+          const div = document.createElement("div"); 
+          div.className = "admin-card";
           div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 15px;">
                 <strong>${m.homeTeam} (${m.homeScore}) vs ${m.awayTeam} (${m.awayScore})</strong>
-                <span style="color:red; font-weight:bold;">${m.status}</span>
+                <span style="color:var(--live-color);">${m.status}</span>
             </div>
             
-            <!-- CONTROLES DE TIEMPO -->
-            <p style="margin-top:10px; font-size:0.85rem; color:var(--text-gray);">1. CONTROL DE TIEMPO</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-              <button onclick="window.setMatchState('${id}', '1H', 0)" style="background:#2563EB;">▶️ Iniciar 1er T</button>
-              <button onclick="window.setMatchState('${id}', 'HT', 45)" class="danger">⏸️ Fin 1er T (ET)</button>
-              <button onclick="window.setMatchState('${id}', '2H', 45)" style="background:#2563EB;">▶️ Iniciar 2do T</button>
-              <button onclick="window.setMatchState('${id}', 'FINISHED', 90)" class="danger" style="background:#000;">⏹️ Finalizar Partido</button>
-            </div>
-            
-            <div style="display: flex; gap: 5px; margin-top: 10px;">
-                <input type="number" id="addTime-${id}" placeholder="+Minutos" style="width: 50%;">
-                <button onclick="window.addTime('${id}')" style="background:#F59E0B; width: 50%;">Sumar Tiempo</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+              <button onclick="window.setMatchState('${id}', '1H', 0)" style="background:#0284C7;">▶️ 1er Tiempo</button>
+              <button onclick="window.setMatchState('${id}', 'HT', 45)" style="background:#F59E0B; color:#000;">⏸️ Entretiempo</button>
+              <button onclick="window.setMatchState('${id}', '2H', 45)" style="background:#0284C7;">▶️ 2do Tiempo</button>
+              <button onclick="window.setMatchState('${id}', 'FINISHED', 90)" class="danger">⏹️ Finalizar</button>
             </div>
 
-            <!-- EXTRAS POR LAS DUDAS -->
-            <div style="display: flex; gap: 5px; margin-top: 5px;">
-                <button onclick="window.setMatchState('${id}', 'ET1', 90)" style="background:#4B5563; font-size:0.8rem;">T. Extra</button>
-                <button onclick="window.setMatchState('${id}', 'PENALTIES', 120)" style="background:#4B5563; font-size:0.8rem;">Penales</button>
-            </div>
-
-            <!-- MARCADOR RÁPIDO -->
-            <p style="margin-top:15px; font-size:0.85rem; color:var(--text-gray);">2. MARCADOR</p>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                 <button onclick="window.addGoal('${id}', 'home', '${m.homeTeam}')" style="background:#10B981;">⚽ Gol Local</button>
                 <button onclick="window.addGoal('${id}', 'away', '${m.awayTeam}')" style="background:#10B981;">⚽ Gol Visitante</button>
             </div>
 
-            <!-- EVENTOS DETALLADOS -->
-            <p style="margin-top:15px; font-size:0.85rem; color:var(--text-gray);">3. TARJETAS Y ESTADÍSTICAS</p>
             <div style="display: flex; gap: 5px;">
-                <input type="text" id="min-${id}" placeholder="Min (ej: 34)" style="width: 25%;">
+                <input type="text" id="min-${id}" placeholder="Min" style="width: 25%;">
                 <input type="text" id="player-${id}" placeholder="Jugador" style="width: 75%;">
             </div>
             <select id="type-${id}">
-              <option value="Amarilla Local 🟨">Amarilla Local</option>
-              <option value="Roja Local 🟥">Roja Local</option>
-              <option value="Amarilla Visit 🟨">Amarilla Visitante</option>
-              <option value="Roja Visit 🟥">Roja Visitante</option>
-              <option value="Corner Local ⛳">Córner Local</option>
-              <option value="Corner Visit ⛳">Córner Visitante</option>
+              <option value="Amarilla Local">🟨 Amarilla Local</option>
+              <option value="Amarilla Visitante">🟨 Amarilla Visitante</option>
+              <option value="Roja Local">🟥 Roja Local</option>
+              <option value="Roja Visitante">🟥 Roja Visitante</option>
             </select>
-            <button onclick="window.addEvent('${id}')" style="background-color: var(--text-dark);">Guardar Evento</button>
+            <button onclick="window.addEvent('${id}')" style="background:#444;">Guardar Tarjeta</button>
           `;
           list.appendChild(div);
         });
       });
     }
 
-    // --- FUNCIONES MÁGICAS ---
-
-    // Cambiar estado e iniciar el reloj en Firebase
+    // Funciones de actualización en Firebase
     window.setMatchState = async (id, status, baseMin) => {
-      if(confirm(`¿Estás seguro de pasar a ${status}?`)) {
-          await updateDoc(doc(db, "matches", id), { 
-              status: status, 
-              baseMinute: baseMin,
-              timerStartedAt: serverTimestamp(),
-              addedTime: 0 // Resetea el tiempo extra al cambiar de tiempo
-          });
-      }
+      await updateDoc(doc(db, "matches", id), { status: status, baseMinute: baseMin, timerStartedAt: serverTimestamp() });
     };
 
-    // Agregar tiempo extra al reloj
-    window.addTime = async (id) => {
-        const time = parseInt(document.getElementById(`addTime-${id}`).value);
-        if(!time) return;
-        await updateDoc(doc(db, "matches", id), { addedTime: time });
-        document.getElementById(`addTime-${id}`).value = '';
-    };
-
-    // Sumar Gol directo (Suma al marcador y al historial)
     window.addGoal = async (id, team, teamName) => {
-        const player = prompt(`¿Quién hizo el gol de ${teamName}? (Dejar en blanco si no sabes)`) || 'Jugador';
-        const min = prompt('¿En qué minuto?') || '';
+        const player = prompt(`¿Quién hizo el gol de ${teamName}?`) || 'Jugador';
+        const min = prompt("¿En qué minuto? (Ej: 34')") || "0'";
+        const type = team === 'home' ? 'Gol Local' : 'Gol Visitante';
         
-        const updateData = {
-            events: arrayUnion({ minute: min, player: player, type: team === 'home' ? 'Gol Local ⚽' : 'Gol Visitante ⚽' })
-        };
-        // Incrementar el marcador usando la función nativa de Firebase
-        if(team === 'home') updateData.homeScore = increment(1);
-        if(team === 'away') updateData.awayScore = increment(1);
-
-        await updateDoc(doc(db, "matches", id), updateData);
+        await updateDoc(doc(db, "matches", id), {
+            events: arrayUnion({ minute: min, player: player, type: type }),
+            [team + 'Score']: increment(1)
+        });
     };
 
-    // Agregar Tarjetas o Corners
     window.addEvent = async (id) => {
-      const min = document.getElementById(`min-${id}`).value || '';
-      const player = document.getElementById(`player-${id}`).value || 'Equipo';
+      const min = document.getElementById(`min-${id}`).value + "'";
+      const player = document.getElementById(`player-${id}`).value;
       const type = document.getElementById(`type-${id}`).value;
+      if(!player) return alert("Falta el jugador");
       
-      await updateDoc(doc(db, "matches", id), {
-        events: arrayUnion({ minute: min, player: player, type: type })
-      });
-
-      document.getElementById(`min-${id}`).value = "";
-      document.getElementById(`player-${id}`).value = "";
+      await updateDoc(doc(db, "matches", id), { events: arrayUnion({ minute: min, player: player, type: type }) });
+      document.getElementById(`min-${id}`).value = ""; document.getElementById(`player-${id}`).value = "";
     };
   </script>
 </body>
