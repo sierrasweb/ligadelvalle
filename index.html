@@ -51,8 +51,14 @@
     import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      // PEGA TUS CLAVES AQUÍ DE NUEVO
-    };
+  apiKey: "AIzaSyBRg-ZamZqFXK-cynKIt6X-FJXDCdD6Osg",
+  authDomain: "liga-del-valle.firebaseapp.com",
+  databaseURL: "https://liga-del-valle-default-rtdb.firebaseio.com",
+  projectId: "liga-del-valle",
+  storageBucket: "liga-del-valle.firebasestorage.app",
+  messagingSenderId: "421001437016",
+  appId: "1:421001437016:web:afeb2b18ca82b9bc850f2d"
+};
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
