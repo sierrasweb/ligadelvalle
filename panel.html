@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Control - Liga del Valle</title>
+  <title>Panel - Liga del Valle</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
   <header>
-    <h1>⚙️ Panel del Club</h1>
+    <h1>⚙️ Panel de Control</h1>
   </header>
 
   <div class="container">
@@ -24,14 +23,14 @@
     <div id="admin-section" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span id="user-info"></span>
-        <button id="btn-logout" class="danger" style="width: auto; padding: 5px 15px;">Cerrar Sesión</button>
+        <button id="btn-logout" class="danger" style="width: auto; padding: 5px 15px;">Salir</button>
       </div>
 
       <div class="card" style="margin-top:20px;">
         <h3>Crear Nuevo Partido</h3>
         <input type="text" id="new-home" placeholder="Equipo Local">
         <input type="text" id="new-away" placeholder="Equipo Visitante">
-        <input type="number" id="new-matchday" placeholder="Número de Fecha" value="1">
+        <input type="number" id="new-matchday" placeholder="Fecha N°" value="1">
         <button id="btn-create-match">Crear Partido</button>
       </div>
 
@@ -48,19 +47,19 @@
     import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROJECT_ID.firebaseapp.com",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_PROJECT_ID.appspot.com",
-      messagingSenderId: "TU_SENDER_ID",
-      appId: "TU_APP_ID"
+      apiKey: "AIzaSyBRg-ZamZqFXK-cynKIt6X-FJXDCdD6Osg",
+      authDomain: "liga-del-valle.firebaseapp.com",
+      databaseURL: "https://liga-del-valle-default-rtdb.firebaseio.com",
+      projectId: "liga-del-valle",
+      storageBucket: "liga-del-valle.firebasestorage.app",
+      messagingSenderId: "421001437016",
+      appId: "1:421001437016:web:afeb2b18ca82b9bc850f2d"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Elementos DOM
     const loginSection = document.getElementById("login-section");
     const adminSection = document.getElementById("admin-section");
     const btnLogin = document.getElementById("btn-login");
@@ -68,18 +67,13 @@
     const loginError = document.getElementById("login-error");
     const userInfo = document.getElementById("user-info");
 
-    // Login
     btnLogin.addEventListener("click", () => {
-      const email = document.getElementById("email").value;
-      const pass = document.getElementById("password").value;
-      signInWithEmailAndPassword(auth, email, pass)
-        .catch(err => loginError.textContent = "Error: " + err.message);
+      signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("password").value)
+        .catch(err => loginError.textContent = "Error: Verifica tus datos.");
     });
 
-    // Logout
     btnLogout.addEventListener("click", () => signOut(auth));
 
-    // Control de Estado de Autenticación
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginSection.style.display = "none";
@@ -92,63 +86,45 @@
       }
     });
 
-    // Crear Partido
     document.getElementById("btn-create-match").addEventListener("click", async () => {
       const home = document.getElementById("new-home").value;
       const away = document.getElementById("new-away").value;
       const matchday = parseInt(document.getElementById("new-matchday").value);
-
-      if(!home || !away) return alert("Completá los nombres de los equipos.");
+      if(!home || !away) return alert("Completá los equipos.");
 
       await addDoc(collection(db, "matches"), {
-        homeTeam: home,
-        awayTeam: away,
-        homeScore: 0,
-        awayScore: 0,
-        status: "SCHEDULED",
-        minute: "0'",
-        matchday: matchday,
-        events: [],
-        date: serverTimestamp()
+        homeTeam: home, awayTeam: away, homeScore: 0, awayScore: 0,
+        status: "SCHEDULED", minute: "0'", matchday: matchday, events: [], date: serverTimestamp()
       });
-
-      alert("Partido creado exitosamente.");
+      alert("Partido creado.");
     });
 
-    // Cargar Partidos para el Operador
     function loadAdminMatches() {
-      const list = document.getElementById("admin-matches-list");
       onSnapshot(collection(db, "matches"), (snapshot) => {
+        const list = document.getElementById("admin-matches-list");
         list.innerHTML = "";
         snapshot.forEach((matchDoc) => {
           const m = matchDoc.data();
-          const id = matchDoc.id;
-
           const div = document.createElement("div");
           div.className = "card";
           div.style.border = "1px solid #ccc";
-
           div.innerHTML = `
             <h4>${m.homeTeam} (${m.homeScore}) vs ${m.awayTeam} (${m.awayScore})</h4>
             <p>Estado: <strong>${m.status}</strong> | Minuto: <strong>${m.minute}</strong></p>
-            
             <div style="margin-top:10px;">
-              <button onclick="window.updateStatus('${id}', 'LIVE')">Iniciar / En Vivo</button>
-              <button onclick="window.updateStatus('${id}', 'FINISHED')" class="danger">Finalizar Partido</button>
+              <button onclick="window.updateStatus('${matchDoc.id}', 'LIVE')">En Vivo</button>
+              <button onclick="window.updateStatus('${matchDoc.id}', 'FINISHED')" class="danger">Finalizar</button>
             </div>
-
             <div style="margin-top:10px;">
-              <input type="text" id="min-${id}" placeholder="Minuto (ej: 34')">
-              <input type="text" id="player-${id}" placeholder="Nombre del Jugador">
-              
-              <select id="type-${id}">
-                <option value="Gol ⚽">Gol Local</option>
+              <input type="text" id="min-${matchDoc.id}" placeholder="Minuto (ej: 34')">
+              <input type="text" id="player-${matchDoc.id}" placeholder="Jugador">
+              <select id="type-${matchDoc.id}">
+                <option value="Gol Local ⚽">Gol Local</option>
                 <option value="Gol Visitante ⚽">Gol Visitante</option>
-                <option value="Amarilla 🟨">Tarjeta Amarilla</option>
-                <option value="Roja 🟥">Tarjeta Roja</option>
+                <option value="Amarilla 🟨">Amarilla</option>
+                <option value="Roja 🟥">Roja</option>
               </select>
-
-              <button onclick="window.addEvent('${id}')">Añadir Evento</button>
+              <button onclick="window.addEvent('${matchDoc.id}')">Añadir Evento</button>
             </div>
           `;
           list.appendChild(div);
@@ -156,37 +132,27 @@
       });
     }
 
-    // Funciones globales para manejar eventos desde HTML dinámico
     window.updateStatus = async (id, status) => {
-      const matchRef = doc(db, "matches", id);
-      await updateDoc(matchRef, { status: status });
+      await updateDoc(doc(db, "matches", id), { status: status });
     };
 
     window.addEvent = async (id) => {
-      const minute = document.getElementById(`min-${id}`).value;
+      const min = document.getElementById(`min-${id}`).value;
       const player = document.getElementById(`player-${id}`).value;
       const type = document.getElementById(`type-${id}`).value;
-
-      if(!minute || !player) return alert("Ingresá minuto y jugador.");
+      if(!min || !player) return alert("Faltan datos.");
 
       const matchRef = doc(db, "matches", id);
       
-      // Si el evento es un gol, incrementamos el marcador
-      let updateObj = {
-        events: arrayUnion({ minute, player, type })
-      };
-
-      if(type === "Gol ⚽") {
-        const snap = await doc(db, "matches", id);
-        // incrementa gol local
+      // Actualizar marcador si es gol
+      if(type === "Gol Local ⚽" || type === "Gol Visitante ⚽") {
+         alert("Evento guardado. Recuerda actualizar el marcador si es necesario (se agregará automático en futuras versiones).");
       }
 
       await updateDoc(matchRef, {
-        minute: minute,
-        events: arrayUnion({ minute, player, type })
+        minute: min,
+        events: arrayUnion({ minute: min, player: player, type: type })
       });
-
-      alert("Evento guardado.");
     };
   </script>
 </body>
