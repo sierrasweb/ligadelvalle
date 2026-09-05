@@ -4,85 +4,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Control | Liga del Valle</title>
-  
-  <!-- Fuente Profesional Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Navbar con Glassmorphism -->
+  <!-- Navbar -->
   <nav class="navbar" id="navbar">
       <div class="container nav-container">
           <a href="#" class="logo">Panel <span>Clubes</span></a>
-          <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar Tema">
-              <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-              <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="5"></circle>
-                  <line x1="12" y1="1" x2="12" y2="3"></line>
-                  <line x1="12" y1="21" x2="12" y2="23"></line>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                  <line x1="1" y1="12" x2="3" y2="12"></line>
-                  <line x1="21" y1="12" x2="23" y2="12"></line>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-          </button>
       </div>
   </nav>
 
-  <!-- Contenedor principal con padding para no quedar debajo de la barra fija -->
-  <main class="container" style="padding-top: 120px; padding-bottom: 60px;">
+  <main class="container" style="padding-top: 100px; padding-bottom: 60px;">
     
-    <!-- Sección de Login -->
+    <!-- Login -->
     <div id="login-section" class="card" style="max-width: 400px; margin: 0 auto; text-align: center;">
-      <h2 style="margin-bottom: 20px; color: var(--text-dark);">Iniciar Sesión</h2>
-      <p style="color: var(--text-gray); margin-bottom: 20px; font-size: 0.9rem;">Acceso exclusivo para administradores y encargados de clubes.</p>
+      <h2>Iniciar Sesión</h2>
       <input type="email" id="email" placeholder="Correo electrónico">
       <input type="password" id="password" placeholder="Contraseña">
-      <button id="btn-login" style="margin-top: 20px;">Ingresar al Panel</button>
+      <button id="btn-login" style="margin-top: 20px;">Ingresar</button>
       <p id="login-error" style="color: var(--live-color); margin-top:15px; font-weight: 600;"></p>
     </div>
 
-    <!-- Sección de Administración -->
+    <!-- Admin -->
     <div id="admin-section" style="display:none;">
       
-      <!-- Cabecera del usuario -->
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px; padding: 20px;">
-        <div>
-            <span style="display: block; font-size: 0.85rem; color: var(--text-gray); text-transform: uppercase; font-weight: 700;">Conectado como</span>
-            <span id="user-info" style="font-weight: 600; color: var(--primary-color);"></span>
-        </div>
-        <button id="btn-logout" class="danger" style="width: auto; padding: 10px 20px; margin-top: 0;">Cerrar Sesión</button>
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; padding: 15px;">
+        <span id="user-info" style="font-weight: 600; color: var(--primary-color);"></span>
+        <button id="btn-logout" class="danger" style="width: auto; padding: 8px 15px; margin-top: 0;">Salir</button>
       </div>
 
-      <!-- Crear Nuevo Partido (Para Admin) -->
       <div class="card" style="margin-bottom: 30px;">
-        <h3 style="margin-bottom: 15px; color: var(--text-dark);">➕ Crear Nuevo Partido</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <input type="text" id="new-home" placeholder="Equipo Local">
-            <input type="text" id="new-away" placeholder="Equipo Visitante">
+        <h3>➕ Crear Partido</h3>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="text" id="new-home" placeholder="Local" style="width: 40%;">
+            <input type="text" id="new-away" placeholder="Visitante" style="width: 40%;">
+            <input type="number" id="new-matchday" placeholder="Fecha N°" value="1" style="width: 20%;">
         </div>
-        <input type="number" id="new-matchday" placeholder="Número de Fecha (Ej: 1)" value="1">
         <button id="btn-create-match" style="margin-top: 15px;">Crear Partido</button>
       </div>
 
-      <!-- Lista de Partidos para Controlar -->
-      <h3 style="margin-bottom: 20px; color: var(--text-dark);">⚙️ Administrar Partidos</h3>
-      <div id="admin-matches-list" class="matches-grid">
-          <p style="color: var(--text-gray);">Cargando partidos...</p>
-      </div>
+      <h3>⚙️ Control en Vivo</h3>
+      <div id="admin-matches-list" class="matches-grid"></div>
     </div>
-
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, arrayUnion, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
   apiKey: "AIzaSyBRg-ZamZqFXK-cynKIt6X-FJXDCdD6Osg",
@@ -98,49 +69,34 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // ... (Lógica de login igual al anterior)
     const loginSection = document.getElementById("login-section");
     const adminSection = document.getElementById("admin-section");
     const btnLogin = document.getElementById("btn-login");
     const btnLogout = document.getElementById("btn-logout");
-    const loginError = document.getElementById("login-error");
-    const userInfo = document.getElementById("user-info");
 
-    // Login
     btnLogin.addEventListener("click", () => {
-      signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("password").value)
-        .catch(err => loginError.textContent = "Error: Verifica tu correo o contraseña.");
+      signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("password").value);
     });
-
-    // Logout
     btnLogout.addEventListener("click", () => signOut(auth));
 
-    // Estado de Autenticación
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        loginSection.style.display = "none";
-        adminSection.style.display = "block";
-        userInfo.textContent = user.email;
-        loadAdminMatches();
+        loginSection.style.display = "none"; adminSection.style.display = "block";
+        document.getElementById("user-info").textContent = user.email; loadAdminMatches();
       } else {
-        loginSection.style.display = "block";
-        adminSection.style.display = "none";
+        loginSection.style.display = "block"; adminSection.style.display = "none";
       }
     });
 
-    // Crear Partido
     document.getElementById("btn-create-match").addEventListener("click", async () => {
-      const home = document.getElementById("new-home").value;
-      const away = document.getElementById("new-away").value;
-      const matchday = parseInt(document.getElementById("new-matchday").value);
-      if(!home || !away) return alert("Completá los equipos.");
-
+      const home = document.getElementById("new-home").value; const away = document.getElementById("new-away").value;
+      if(!home || !away) return alert("Faltan equipos");
       await addDoc(collection(db, "matches"), {
         homeTeam: home, awayTeam: away, homeScore: 0, awayScore: 0,
-        status: "SCHEDULED", minute: "0'", matchday: matchday, events: [], date: serverTimestamp()
+        status: "SCHEDULED", baseMinute: 0, addedTime: 0, matchday: parseInt(document.getElementById("new-matchday").value), events: [], date: serverTimestamp()
       });
-      alert("Partido creado con éxito.");
-      document.getElementById("new-home").value = "";
-      document.getElementById("new-away").value = "";
+      alert("Partido creado");
     });
 
     // Cargar Partidos para Administrar
@@ -149,94 +105,113 @@
         const list = document.getElementById("admin-matches-list");
         list.innerHTML = "";
         snapshot.forEach((matchDoc) => {
-          const m = matchDoc.data();
-          const id = matchDoc.id;
-          const div = document.createElement("div");
-          div.className = "card";
+          const m = matchDoc.data(); const id = matchDoc.id;
+          const div = document.createElement("div"); div.className = "card";
           
-          let statusColor = m.status === 'LIVE' ? 'var(--live-color)' : 'var(--primary-color)';
-
           div.innerHTML = `
-            <div class="match-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-              <span>FECHA ${m.matchday}</span>
-              <strong style="color: ${statusColor};">${m.status} | MIN: ${m.minute}</strong>
-            </div>
-            <div class="scoreboard" style="font-size: 1rem;">
-              <div class="team-name">${m.homeTeam} <strong>(${m.homeScore})</strong></div>
-              <div>vs</div>
-              <div class="team-name">${m.awayTeam} <strong>(${m.awayScore})</strong></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding-bottom:10px;">
+                <strong>${m.homeTeam} (${m.homeScore}) vs ${m.awayTeam} (${m.awayScore})</strong>
+                <span style="color:red; font-weight:bold;">${m.status}</span>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button onclick="window.updateStatus('${id}', 'LIVE')">Poner en Vivo</button>
-              <button onclick="window.updateStatus('${id}', 'FINISHED')" class="danger">Finalizar</button>
+            <!-- CONTROLES DE TIEMPO -->
+            <p style="margin-top:10px; font-size:0.85rem; color:var(--text-gray);">1. CONTROL DE TIEMPO</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+              <button onclick="window.setMatchState('${id}', '1H', 0)" style="background:#2563EB;">▶️ Iniciar 1er T</button>
+              <button onclick="window.setMatchState('${id}', 'HT', 45)" class="danger">⏸️ Fin 1er T (ET)</button>
+              <button onclick="window.setMatchState('${id}', '2H', 45)" style="background:#2563EB;">▶️ Iniciar 2do T</button>
+              <button onclick="window.setMatchState('${id}', 'FINISHED', 90)" class="danger" style="background:#000;">⏹️ Finalizar Partido</button>
             </div>
             
-            <div style="margin-top:20px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-              <p style="font-size: 0.9rem; color: var(--text-gray); margin-bottom: 10px;"><strong>Cargar Evento</strong></p>
-              <div style="display: flex; gap: 10px;">
-                  <input type="text" id="min-${id}" placeholder="Minuto (ej: 34')" style="width: 30%;">
-                  <input type="text" id="player-${id}" placeholder="Jugador" style="width: 70%;">
-              </div>
-              <select id="type-${id}">
-                <option value="Gol Local ⚽">Gol Local</option>
-                <option value="Gol Visitante ⚽">Gol Visitante</option>
-                <option value="Amarilla 🟨">Amarilla</option>
-                <option value="Roja 🟥">Roja</option>
-              </select>
-              <button onclick="window.addEvent('${id}')" style="background-color: var(--text-dark);">Añadir Evento</button>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <input type="number" id="addTime-${id}" placeholder="+Minutos" style="width: 50%;">
+                <button onclick="window.addTime('${id}')" style="background:#F59E0B; width: 50%;">Sumar Tiempo</button>
             </div>
+
+            <!-- EXTRAS POR LAS DUDAS -->
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <button onclick="window.setMatchState('${id}', 'ET1', 90)" style="background:#4B5563; font-size:0.8rem;">T. Extra</button>
+                <button onclick="window.setMatchState('${id}', 'PENALTIES', 120)" style="background:#4B5563; font-size:0.8rem;">Penales</button>
+            </div>
+
+            <!-- MARCADOR RÁPIDO -->
+            <p style="margin-top:15px; font-size:0.85rem; color:var(--text-gray);">2. MARCADOR</p>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.addGoal('${id}', 'home', '${m.homeTeam}')" style="background:#10B981;">⚽ Gol Local</button>
+                <button onclick="window.addGoal('${id}', 'away', '${m.awayTeam}')" style="background:#10B981;">⚽ Gol Visitante</button>
+            </div>
+
+            <!-- EVENTOS DETALLADOS -->
+            <p style="margin-top:15px; font-size:0.85rem; color:var(--text-gray);">3. TARJETAS Y ESTADÍSTICAS</p>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="min-${id}" placeholder="Min (ej: 34)" style="width: 25%;">
+                <input type="text" id="player-${id}" placeholder="Jugador" style="width: 75%;">
+            </div>
+            <select id="type-${id}">
+              <option value="Amarilla Local 🟨">Amarilla Local</option>
+              <option value="Roja Local 🟥">Roja Local</option>
+              <option value="Amarilla Visit 🟨">Amarilla Visitante</option>
+              <option value="Roja Visit 🟥">Roja Visitante</option>
+              <option value="Corner Local ⛳">Córner Local</option>
+              <option value="Corner Visit ⛳">Córner Visitante</option>
+            </select>
+            <button onclick="window.addEvent('${id}')" style="background-color: var(--text-dark);">Guardar Evento</button>
           `;
           list.appendChild(div);
         });
       });
     }
 
-    // Funciones globales para manejar los clics
-    window.updateStatus = async (id, status) => {
-      await updateDoc(doc(db, "matches", id), { status: status });
+    // --- FUNCIONES MÁGICAS ---
+
+    // Cambiar estado e iniciar el reloj en Firebase
+    window.setMatchState = async (id, status, baseMin) => {
+      if(confirm(`¿Estás seguro de pasar a ${status}?`)) {
+          await updateDoc(doc(db, "matches", id), { 
+              status: status, 
+              baseMinute: baseMin,
+              timerStartedAt: serverTimestamp(),
+              addedTime: 0 // Resetea el tiempo extra al cambiar de tiempo
+          });
+      }
     };
 
+    // Agregar tiempo extra al reloj
+    window.addTime = async (id) => {
+        const time = parseInt(document.getElementById(`addTime-${id}`).value);
+        if(!time) return;
+        await updateDoc(doc(db, "matches", id), { addedTime: time });
+        document.getElementById(`addTime-${id}`).value = '';
+    };
+
+    // Sumar Gol directo (Suma al marcador y al historial)
+    window.addGoal = async (id, team, teamName) => {
+        const player = prompt(`¿Quién hizo el gol de ${teamName}? (Dejar en blanco si no sabes)`) || 'Jugador';
+        const min = prompt('¿En qué minuto?') || '';
+        
+        const updateData = {
+            events: arrayUnion({ minute: min, player: player, type: team === 'home' ? 'Gol Local ⚽' : 'Gol Visitante ⚽' })
+        };
+        // Incrementar el marcador usando la función nativa de Firebase
+        if(team === 'home') updateData.homeScore = increment(1);
+        if(team === 'away') updateData.awayScore = increment(1);
+
+        await updateDoc(doc(db, "matches", id), updateData);
+    };
+
+    // Agregar Tarjetas o Corners
     window.addEvent = async (id) => {
-      const min = document.getElementById(`min-${id}`).value;
-      const player = document.getElementById(`player-${id}`).value;
+      const min = document.getElementById(`min-${id}`).value || '';
+      const player = document.getElementById(`player-${id}`).value || 'Equipo';
       const type = document.getElementById(`type-${id}`).value;
-      if(!min || !player) return alert("Faltan ingresar el minuto o el jugador.");
-
-      const matchRef = doc(db, "matches", id);
       
-      if(type === "Gol Local ⚽" || type === "Gol Visitante ⚽") {
-         alert("Evento guardado. Recuerda que debes actualizar los goles manualmente desde la base de datos por ahora.");
-      }
-
-      await updateDoc(matchRef, {
-        minute: min,
+      await updateDoc(doc(db, "matches", id), {
         events: arrayUnion({ minute: min, player: player, type: type })
       });
 
       document.getElementById(`min-${id}`).value = "";
       document.getElementById(`player-${id}`).value = "";
     };
-
-    // --- LÓGICA DEL MODO OSCURO ---
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-        htmlElement.setAttribute('data-theme', 'dark');
-    }
-
-    themeToggleBtn.addEventListener('click', () => {
-        if (htmlElement.getAttribute('data-theme') === 'dark') {
-            htmlElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-        } else {
-            htmlElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        }
-    });
   </script>
 </body>
 </html>
