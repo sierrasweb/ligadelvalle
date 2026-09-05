@@ -1,29 +1,65 @@
-/* --- Nuevos estilos para la versión PRO --- */
-.tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-.tab-btn { background: transparent; border: none; color: var(--text-gray); font-weight: 600; padding: 10px 20px; cursor: pointer; border-radius: 8px; box-shadow: none; }
-.tab-btn.active { background: var(--primary-color); color: #fff; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
+:root {
+  --bg-main: #1A1A1A;
+  --bg-card: #242424;
+  --border-color: #333333;
+  --text-main: #EAEAEA;
+  --text-muted: #888888;
+  --score-blue: #0A5C8A;
+  --live-color: #00D1B2;
+}
 
-/* Tabla de posiciones */
-.table-responsive { overflow-x: auto; background: var(--white); border-radius: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
-.standings-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; }
-.standings-table th { background-color: var(--bg-light); padding: 12px 10px; font-weight: 700; color: var(--text-dark); border-bottom: 2px solid var(--border-color); }
-.standings-table td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); color: var(--text-dark); }
-.standings-table tr:hover { background-color: var(--primary-light); }
-.standings-table .team-name-cell { text-align: left; font-weight: 600; }
-.pts-col { font-weight: 800; color: var(--primary-color); }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: var(--bg-main); color: var(--text-main); }
 
-/* Detalles del partido */
-.match-details { display: none; margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; animation: fadeIn 0.3s; }
-.match-details.open { display: block; }
-.btn-toggle-details { width: 100%; background: var(--bg-light); color: var(--text-dark); border: 1px solid var(--border-color); margin-top: 10px; box-shadow: none; }
-.btn-toggle-details:hover { background: var(--border-color); }
+.container { max-width: 800px; margin: 0 auto; padding: 15px; }
 
-.stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-.stat-box { background: var(--bg-light); padding: 10px; border-radius: 8px; text-align: center; font-size: 0.85rem; }
-.stat-box strong { display: block; font-size: 1.1rem; color: var(--primary-color); }
+/* --- VISTA DE LISTA (Como Imagen 1) --- */
+.jornada-title { background: var(--bg-card); padding: 15px; font-weight: bold; border-bottom: 1px solid var(--border-color); border-top-left-radius: 8px; border-top-right-radius: 8px; margin-top: 20px;}
+.match-row { display: flex; align-items: center; background: var(--bg-card); padding: 15px 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background 0.2s; }
+.match-row:hover { background: #2a2a2a; }
+.match-row:last-child { border-bottom: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
 
-/* Footer Sierras Web */
-.sierras-footer { text-align: center; padding: 30px 0; margin-top: 40px; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-gray); }
-.sierras-footer a { color: var(--primary-color); font-weight: 700; text-decoration: none; }
+.match-minute { width: 50px; font-weight: bold; color: var(--text-muted); text-align: center; font-size: 0.9rem; }
+.match-minute.live { color: var(--live-color); }
+.match-minute.live::after { content: ''; display: block; width: 20px; height: 2px; background: var(--live-color); margin: 3px auto 0; }
+
+.match-teams { flex: 1; display: flex; align-items: center; justify-content: space-between; }
+.team { flex: 1; font-weight: 500; font-size: 1rem; }
+.team.home { text-align: right; padding-right: 15px; }
+.team.away { text-align: left; padding-left: 15px; }
+
+.score-box { background: var(--score-blue); color: #fff; display: flex; align-items: center; font-weight: bold; border-radius: 4px; padding: 5px 10px; font-size: 1.1rem; letter-spacing: 2px; }
+.score-box span { margin: 0 5px; color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+
+/* --- VISTA DE DETALLE (Como Imágenes 2 y 3) --- */
+.match-detail-header { background: var(--bg-card); padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; position: relative; }
+.btn-back { position: absolute; left: 15px; top: 15px; background: transparent; border: none; color: var(--text-main); font-size: 1rem; cursor: pointer; }
+.detail-league { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+
+.detail-scoreboard { display: flex; justify-content: center; align-items: center; gap: 20px; }
+.detail-team { font-size: 1.3rem; font-weight: bold; flex: 1; text-transform: uppercase; }
+.detail-team.home { text-align: right; }
+.detail-team.away { text-align: left; }
+.detail-score-center { text-align: center; }
+.detail-score-center .min { font-size: 0.85rem; background: #111; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
+.detail-score-center .min.live { background: var(--live-color); color: #000; font-weight: bold; }
+.detail-score-center .score { font-size: 2.5rem; font-weight: bold; line-height: 1; }
+
+.eventos-title { font-size: 1.2rem; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+.timeline { background: var(--bg-card); border-radius: 8px; padding: 20px 0; }
+.timeline-event { display: grid; grid-template-columns: 1fr 60px 1fr; align-items: center; margin-bottom: 15px; font-size: 0.95rem; }
+.event-left { text-align: right; padding-right: 15px; }
+.event-right { text-align: left; padding-left: 15px; }
+.event-minute { text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+.timeline-divider { text-align: center; color: var(--text-main); font-size: 0.85rem; padding: 15px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin: 20px 0; }
+
+/* Panel Admin */
+input, select, button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-main); }
+button { background: var(--score-blue); font-weight: bold; cursor: pointer; border: none; }
+button:hover { filter: brightness(1.2); }
+button.danger { background: #B91C1C; }
+.admin-card { background: var(--bg-card); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+
+/* Publicidad */
+.footer-sierras { text-align: center; padding: 30px 15px; font-size: 0.85rem; color: var(--text-muted); }
+.footer-sierras a { color: var(--score-blue); font-weight: bold; text-decoration: none; }
